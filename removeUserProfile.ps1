@@ -1,7 +1,7 @@
 #Remove User Profile
 #Display all users, run in loop and take input delete user input
 #Exit on "Exit" and redisplay on 1
-$User = #get user
+$User = #get user from input
 Get-CimInstance -Class Win32_UserProfile | Where-Object {$_.LocalPath.split('\')[-1] -eq $User } | Remove-CimInstance
 
 #See Users/get folders of path
