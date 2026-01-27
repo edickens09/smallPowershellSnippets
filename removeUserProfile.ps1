@@ -5,7 +5,7 @@ Get-ChildItem C:\Users
 
 $Selection = 0
 
-While ($Selection != 4 && != "exit") {
+While ($Selection -ne 4 -and -ne "exit") {
     Write-Output "1 Delete User"
     Write-Output "4 Exit"
     $Selection = Read-Host "Please Enter your selection: "
