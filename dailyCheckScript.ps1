@@ -1,10 +1,10 @@
-New#Escalate to higher privileges
+#Escalate to higher privileges
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-	Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-	Exit
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    Exit
 }
 
-#Chech for Network Discovery and Disable if turned on
+#Check for Network Discovery and Disable if turned on
 $networkDiscovery = Get-NetFirewallRule -DisplayGroup "Network Discovery"
 if ($networkDiscovery.Enabled -eq 'True') {
     Set-NetFirewallRule -DisplayGroup "Network Discovery" -Enabled False -Profile Any
