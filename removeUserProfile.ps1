@@ -13,6 +13,7 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
 
         $User = Read-Host "Enter user to delete"
         Get-CimInstance -Class Win32_UserProfile | Where-Object {$_.LocalPath.split('\')[-1] -eq $User } | Remove-CimInstance
+        Write
 
     }
 }

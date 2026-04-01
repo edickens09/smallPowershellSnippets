@@ -2,10 +2,12 @@ $admin = ".admin"
 $dadamin = ".dadmin"
 $Users = Get-ChildItem C:\Users | Where-Object {$_.Name -like "*$admin*" or $_.Name -like "*$dadmin" }
 
+#escalate to admin if not already in an admin window
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
         Start-Process powershell.exe "-NoProfile -File `"$PSCommandPath`"" -Verb RunAs
         Exit
 	}
+
 foreach ($User in $Users) {
     if (Get-LocalUser -Name $User -ErrorAction SilentlyContinue) {
         Remove-LocalUser -Name $User
