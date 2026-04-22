@@ -20,7 +20,6 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
                         Write-Output $user.SamAccountName
                     }
                     $User = Read-Host "User: "
-                    #need logic here so far Disable-ADAccount has to run 
                 }
             Disable-ADAccount -Identity $User
             } else {
@@ -30,6 +29,38 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
 
         }
         #if selection equals 2
-        2 {}
+        2 {
+            $User = Read-Host "Enter User you wish to remove from all groups: "
+            if (Get-ADUser -Identity $User -or Get-ADUser -Filter 'Name -like "User*"') {
+                $UserCount = @(Get-ADUser -Filter 'Name -like "$User*"')
+                if ($UerCount.Count -gt 1) {
+                    Write-Output "Multiple users found, pleae use a below name"
+                    foreach ($user in $UserCount) {
+                        Write-Output $user.SamAccountName
+                    }
+                    $User = Read-Host "User: "
+                }
+            }
+            #Logic for removing user from all groups
+            $Groups = @(Get-ADPrincipalGroupMembership $User | select name)
+            foreach ($Group in $Groups) {
+                Remove-ADGroupMember -Identity $Group -Members $User
+            }
+        }
+        #if selection equals 3
+        3 {
+            $User = Read-Host "Enter User to want to convert to shared mailbox"
+            if (Get-ADUser -Identity $User -or Get-ADUser -Filter 'Name -like "$User*"') {
+                $UserCount = @(Get-ADUser -Filter 'Name -like "$User*"')
+                if ($UserCount.Count -gt 1) {
+                    Write-Output "Multiple users found, please use a below name"
+                    foreach ($user in $UserCount) {
+                        Write-Output $user.SamAccountName
+                    }
+                    $User = Read-Host "User: "
+                }
+            #Logic for converting $User to a shared mailbox
+            }
+        }
     }
 }
