@@ -2,9 +2,18 @@
 $Selection = 0
 
 function Get-User {
-    $User = Read-Host "Enter User to want to convert to shared mailbox"
-    if (Get-ADUser -Identity $User -or Get-ADUser -Filter 'Name -like "$User*"') {
-        $UserCount = @(Get-ADUser -Filter 'Name -like "$User*"')
+    $User = Read-Host "User: "
+    if ((Get-ADUser -Filter "SamAccountName -eq '$User' -or Name -like '$User*' -or DisplayName -like '$User*'") {
+        #this isn't what I need maybe I need to changin the logice?
+        $UserCountName = @(Get-ADUser -Filter "Name -like '*$User*'")
+        $UserCountDisplayName = @(Get-ADUser -Filter "DisplayName -like '*$User*'")
+
+        if ($UserCountName.Count > $UserCountDisplayName.Count) {
+            $UserCount = $UserCountName
+        } else {
+            $UserCount = $UserCountDisplayName
+        }
+
         if ($UserCount.Count -gt 1) {
             Write-Output "Multiple users found, pleae use a below name"
             foreach ($user in $UserCount) {
@@ -15,7 +24,6 @@ function Get-User {
         }
         return $User
     }
-    return ""
 }
 
 While ($Selection -ne "4" -and $Selection -ne "exit") {
