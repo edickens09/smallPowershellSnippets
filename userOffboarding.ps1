@@ -2,27 +2,36 @@
 $Selection = 0
 
 function Get-User {
+    $UserAccount = $null
     $User = Read-Host "User: "
-    if ((Get-ADUser -Filter "SamAccountName -eq '$User' -or Name -like '$User*' -or DisplayName -like '$User*'") {
-        #this isn't what I need maybe I need to changin the logice?
-        $UserCountName = @(Get-ADUser -Filter "Name -like '*$User*'")
-        $UserCountDisplayName = @(Get-ADUser -Filter "DisplayName -like '*$User*'")
 
-        if ($UserCountName.Count > $UserCountDisplayName.Count) {
-            $UserCount = $UserCountName
-        } else {
-            $UserCount = $UserCountDisplayName
-        }
+    $UserHolding = Get-ADUser -Filter "SamAccountName -eq '$User' -or Name -like '$User*' -or DisplayName -like '$User*'"
 
-        if ($UserCount.Count -gt 1) {
+    if ($UserHolding) {
+        #this isn't what I need maybe I need to change the logic?
+        #$UserCountName = @(Get-ADUser -Filter "Name -like '*$User*'")
+        #$UserCountDisplayName = @(Get-ADUser -Filter "DisplayName -like '*$User*'")
+
+        #if ($UserCountName.Count > $UserCountDisplayName.Count) {
+        #    $UserCount = $UserCountName
+        #} else {
+        #    $UserCount = $UserCountDisplayName
+        #}
+
+        if ($UserHolding.Count -gt 1) {
             Write-Output "Multiple users found, pleae use a below name"
-            foreach ($user in $UserCount) {
-                Write-Output $user.SamAccountName
+            While ($null -eq $UserAccount) {
+                foreach ($user in $UserHolding) {
+                    Write-Output $user.SamAccountName
+                }
+                $User = Read-Host "User: "
+                $UserAccount = Get-ADUser -Identity $User
+
             }
-            $User = Read-Host "User: "
-            return $User
+                        return $UserAccount
         }
-        return $User
+        $UserAccount = Get-ADUser -Identity $User
+        return $UserAccount
     }
 }
 
@@ -40,6 +49,7 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
                 $User = Get-User
             }
             Disable-ADAccount -Identity $User
+            $Selection = 0
         }
         #if selection equals 2
         2 {
@@ -52,6 +62,7 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
             foreach ($Group in $Groups) {
                 Remove-ADGroupMember -Identity $Group -Members $User
             }
+            $Selection = 0
     }
         #if selection equals 3
         3 {
