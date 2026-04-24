@@ -3,32 +3,27 @@ $Selection = 0
 
 function Get-User {
     $UserAccount = $null
-    $User = Read-Host "User: "
+    $UserAccounts = [System.Collections.Generic.List[Microsoft.ActiveDirectory.Management.ADUser]]::new()
+    $User = Read-Host "User"
 
     $UserHolding = Get-ADUser -Filter "SamAccountName -eq '$User' -or Name -like '$User*' -or DisplayName -like '$User*'"
 
     if ($UserHolding) {
-        #this isn't what I need maybe I need to change the logic?
-        #$UserCountName = @(Get-ADUser -Filter "Name -like '*$User*'")
-        #$UserCountDisplayName = @(Get-ADUser -Filter "DisplayName -like '*$User*'")
-
-        #if ($UserCountName.Count > $UserCountDisplayName.Count) {
-        #    $UserCount = $UserCountName
-        #} else {
-        #    $UserCount = $UserCountDisplayName
-        #}
 
         if ($UserHolding.Count -gt 1) {
-            Write-Output "Multiple users found, pleae use a below name"
-            While ($null -eq $UserAccount) {
-                foreach ($user in $UserHolding) {
-                    Write-Output $user.SamAccountName
+            foreach ($user in $UserHolding) {
+                if ($UserAccounts.SamAccountName -notcontains $user.SamAccountName) {
+                    $UserAccounts.Add($user)
                 }
-                $User = Read-Host "User: "
+            }
+            Write-Output "Multiple users found, pleae use a below name"
+            $UserAccounts | Format-Table -Property SamAccountName, Enabled
+            While ($null -eq $UserAccount) {
+                $User = Read-Host "User"
                 $UserAccount = Get-ADUser -Identity $User
 
             }
-                        return $UserAccount
+            return $UserAccount
         }
         $UserAccount = Get-ADUser -Identity $User
         return $UserAccount
@@ -45,7 +40,7 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
     switch ($Selection) {
         #if selection equals 1
         1 {
-            While ($User -eq "") {
+            While ($null -eq $User) {
                 $User = Get-User
             }
             Disable-ADAccount -Identity $User
@@ -54,7 +49,7 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
         #if selection equals 2
         2 {
 
-            While ($User -eq "") {
+            While ($null -eq $User) {
                 $User = Get-User 
             }
             #Logic for removing user from all groups
