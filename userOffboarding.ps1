@@ -6,11 +6,13 @@ function Get-User {
     $UserAccounts = [System.Collections.Generic.List[Microsoft.ActiveDirectory.Management.ADUser]]::new()
     $User = Read-Host "User"
 
+    # Call to Server to get all possible users
     $UserHolding = Get-ADUser -Filter "SamAccountName -eq '$User' -or Name -like '$User*' -or DisplayName -like '$User*'"
 
     if ($UserHolding) {
-
         if ($UserHolding.Count -gt 1) {
+
+            # Looping through and creating an array of usernames without calling server directly.
             foreach ($user in $UserHolding) {
                 if ($UserAccounts.SamAccountName -notcontains $user.SamAccountName) {
                     $UserAccounts.Add($user)
@@ -18,6 +20,8 @@ function Get-User {
             }
             Write-Output "Multiple users found, pleae use a below name"
             $UserAccounts | Format-Table -Property SamAccountName, Enabled
+
+            # Checking that user inputs an accurate Sam Account Name
             While ($null -eq $UserAccount) {
                 $User = Read-Host "User"
                 $UserAccount = Get-ADUser -Identity $User
@@ -31,7 +35,7 @@ function Get-User {
 }
 
 While ($Selection -ne "4" -and $Selection -ne "exit") {
-    $User = ""
+    $User = $null
     Write-Output "1 Disable User Account"
     Write-Output "2 Remove From Groups"
     Write-Output "3 Convert User to Shared Mailbox"
