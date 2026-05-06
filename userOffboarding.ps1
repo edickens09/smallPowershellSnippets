@@ -69,11 +69,12 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
                 $User = Get-User
             }
             # Logic for converting user to Shared Mailbox
+            $Selection = 0
         }
         #if selection equals 4
         4 {
 
-            return
+            continue
         }
     }
 }
