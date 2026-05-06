@@ -3,7 +3,7 @@ $Selection = 0
 
 function Get-User {
     $UserAccount = $null
-    $UserAccounts = [System.Collections.Generic.List[Microsoft.ActiveDirectory.Management.ADUser]]::new()
+    $UserAccounts = [System.Collections.Generic.List[PSObject]]::new()
     $User = Read-Host "User"
 
     # Call to Server to get all possible users
