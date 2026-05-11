@@ -1,6 +1,8 @@
 # Offboard an Active Directory User
 $Selection = 0
 
+
+
 function Get-User {
     $UserAccount = $null
     $UserAccounts = [System.Collections.Generic.List[PSObject]]::new()
@@ -18,18 +20,19 @@ function Get-User {
                     $UserAccounts.Add($user)
                 }
             }
-            Write-Output "Multiple users found, pleae use a below name"
-            $UserAccounts | Format-Table -Property SamAccountName, Enabled
-
+            Write-Host "Multiple users found, pleae use a below name"
+            foreach ($user in $UserAccounts) { 
+                Write-Host $user
+                }
             # Checking that user inputs an accurate Sam Account Name
             While ($null -eq $UserAccount) {
-                $User = Read-Host "User"
-                $UserAccount = Get-ADUser -Identity $User
+                $User = Read-Host "New User"
+                $UserAccount = Get-ADUser -Filter "SamAccountName -eq '$User'"
 
             }
             return $UserAccount
         }
-        $UserAccount = Get-ADUser -Identity $User
+        $UserAccount = Get-ADUser -Filter "SamAccountName -eq '$User'"
         return $UserAccount
     }
 }
@@ -49,6 +52,7 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
             }
             Disable-ADAccount -Identity $User
             $Selection = 0
+            continue
         }
         #if selection equals 2
         2 {
