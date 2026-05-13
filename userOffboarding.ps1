@@ -1,7 +1,10 @@
 # Offboard an Active Directory User
 $Selection = 0
 
-
+If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuildtInRol]'Administrator')) {
+    Start-Process powershell.exe "-NoProfile -File `"$PSCommandPath`"" -Verb RunAs
+    Exit
+}
 
 function Get-User {
     $UserAccount = $null
@@ -37,12 +40,13 @@ function Get-User {
     }
 }
 
-While ($Selection -ne "4" -and $Selection -ne "exit") {
+While ($Selection -ne "5" -and $Selection -ne "exit") {
     $User = $null
     Write-Output "1 Disable User Account"
     Write-Output "2 Remove From Groups"
     Write-Output "3 Convert User to Shared Mailbox"
-    Write-Output "4 Exit"
+    Write-Output "4 Remove Microsoft Licenses from User"
+    Write-Output "5 Exit"
     $Selection = Read-Host "Please enter your selection: "
     switch ($Selection) {
         #if selection equals 1
@@ -50,7 +54,12 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
             While ($null -eq $User) {
                 $User = Get-User
             }
-            Disable-ADAccount -Identity $User
+            try {
+                Disable-ADAccount -Identity $User
+            } catch {
+                Write-Output "Error Disabling account"
+            }
+
             $Selection = 0
             continue
         }
@@ -63,7 +72,13 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
             #Logic for removing user from all groups
             $Groups = @(Get-ADPrincipalGroupMembership $User | select name)
             foreach ($Group in $Groups) {
-                Remove-ADGroupMember -Identity $Group -Members $User
+                if ($Group.Name -ne "Domain Users") {
+                    try {
+                        Remove-ADGroupMember -Identity $Group -Members $User
+                    } catch {
+                        Write-Output "Error removing $User from $Group"
+                    }
+                }
             }
             $Selection = 0
     }
@@ -72,12 +87,33 @@ While ($Selection -ne "4" -and $Selection -ne "exit") {
             While ($User -eq "") {
                 $User = Get-User
             }
-            # Logic for converting user to Shared Mailbox
+
+            # logic for converting to a shared mailbox in exchange online
+            if ($User.mailNickname) {
+
+                Connect-ExchangeOnline
+                try {
+                    Set-Mailbox -Identity $User.UserPrincipalName -Type Shared
+                } catch {
+                    Write-Host "Error Converting $User.SamAccountName to Shared"
+                }
+            }
+            
             $Selection = 0
+            continue
         }
         #if selection equals 4
         4 {
 
+            While ($User -eq "") {
+                $User = Get-User
+            }
+
+            $Selection = 0
+            continue
+        }
+
+        5 {
             continue
         }
     }
